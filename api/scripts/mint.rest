@@ -1,0 +1,18 @@
+POST http://localhost:8080/cryptum/nft/deploy HTTP/1.1
+Accept: application/json
+
+
+###
+POST http://localhost:8080/cryptum/nft/mint HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "address": "0x20D40a314e64Be3d21015178E35E7589CE79a3F9",
+  "metadataUrl": "https://ipfs.io/ipfs/bafyreialor57whlvuzdgb5ew6ots3pgxd63o55342f5i5klrhmdpnt4xva/metadata.json"
+}
+
+###
+
+GET http://localhost:8080/cryptum/nft/7979089742858759 HTTP/1.1
+Accept: application/json
