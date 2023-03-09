@@ -7,7 +7,7 @@ const styles = {
    bg: `bg-[#0b0817] px-[18px] pt-[150px] pb-[200px] flex justify-center`,
    about1: `bg-[#0b0817] font-[Arial] text-[25px] text-center md:text-[45px] pt-[40px]`,
    purple: `font-manrope text-[25px] text-[#6e45c7] md:text-[40px]`,
-   container: `bg-[#161226] border-white shadow-[1px_1px_8px_-3px_rgba(0,0,0,0)] shadow-white rounded-[30px] px-3 py-3 flex flex-col sm:flex-row justify-center md:max-w-2xl shadow-lg  `,
+   container: `bg-[#161226] border-white shadow-[1px_1px_10px_-4px_rgba(0,0,0,0)] shadow-white rounded-[30px] px-3 py-3 flex flex-col sm:flex-row justify-center md:max-w-2xl shadow-lg  `,
    div1: ` p-2 sm:w-1/2 flex flex-col justify-center text-center space-y-2`,
    div2: ` p-2 sm:w-1/2 align-middle text-center flex flex-col justify-center space-y-5` ,
    image: ` px-6 py-0 `,
