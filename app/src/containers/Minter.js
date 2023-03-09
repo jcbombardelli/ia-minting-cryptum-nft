@@ -1,28 +1,28 @@
 import React from 'react'
 import { useState } from 'react';
 import { useEffect } from 'react';
-import logo from '../app/assets/mintermaster.jpeg';
+
 
 const styles = {
-   bg: `bg-[#0b0817] px-[18px] pt-[70px] pb-[200px] flex justify-center`,
+   bg: `bg-[#0b0817] px-[18px] pt-[150px] pb-[200px] flex justify-center`,
    about1: `bg-[#0b0817] font-[Arial] text-[25px] text-center md:text-[45px] pt-[40px]`,
-   purple: `font-[Arial] text-[25px] text-[#6e45c7] md:text-[40px]`,
-   container: `rounded-[30px] px-3 py-3 flex flex-col sm:flex-row justify-center bg-[#161226] md:max-w-2xl shadow-lg  `,
+   purple: `font-manrope text-[25px] text-[#6e45c7] md:text-[40px]`,
+   container: `bg-[#161226] border-white shadow-[1px_1px_8px_-3px_rgba(0,0,0,0)] shadow-white rounded-[30px] px-3 py-3 flex flex-col sm:flex-row justify-center md:max-w-2xl shadow-lg  `,
    div1: ` p-2 sm:w-1/2 flex flex-col justify-center text-center space-y-2`,
    div2: ` p-2 sm:w-1/2 align-middle text-center flex flex-col justify-center space-y-5` ,
    image: ` px-6 py-0 `,
    generating: `font-[Arial] text-white text-lg mx-6`,
    metamaskerror: `font-[Arial] text-sm bg-[#ffffff] mx-6 capitalize p-1`,
-   btnconnect: `font-[Arial] w-full animate-pulse text-lg bg-[#6e45c7] hover:bg-[#45c76e] text-white font-bold p-4  shadow-md`,
-   btnclear: `font-[Arial] w-full text-lg bg-[#6e45c7] hover:bg-[red] text-white font-bold p-4  shadow-md`,
-   btnredo: `font-[Arial] w-[80px] text-lg bg-[#6e45c7] hover:bg-[#45c76e] text-white font-bold p-4  shadow-md`,
+   btnconnect: `font-[Arial] border-0 w-full animate-pulse text-lg bg-[#6e45c7] hover:bg-[#7935adcc] text-white font-bold p-4  shadow-md`,
+   btnclear: `font-[Arial] w-full text-lg bg-[#6e45c7] hover:bg-[red] text-white font-bold p-4  shadow-md border-0`,
+   btnredo: `font-[Arial] w-[80px] text-lg bg-[#4b2c91] hover:bg-[grey] text-white font-bold p-4  shadow-md border-0`,
+   btnQR: ` border-0 font-[Arial] w-[50px] text-lg bg-[#4b2c91] hover:bg-[grey] text-white  font-bold   shadow-md`,
    polygon: `max-w-[100px] mx-auto`,
    modal: `mx-auto`,
    spinner: `mb-2 mx-auto mt-[100px] w-20 h-20 rounded-full animate-spin border-8 border-solid border-purple-500 border-t-transparent`,
    opensea: `max-w-[260px] mx-auto pt-[20px]`,
    inputbox: `font-[Arial] w-[full] text-[18px]`,
    inputfield: `w-[100%] text-[#64B6AC] truncate`,
-
 }
 
 
@@ -35,14 +35,11 @@ const Minter = () => {
    const [modalMessage, setModalMessage] = useState("")
    const [img, setImg] = useState('mintermaster.jpeg')
    const [nftAddress, setNftAddress] = useState('0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270')
+   const [walletAddress, setWalletAddress] = useState('NFT Mint Master')
 
    const inputTextChanged = (e) => {
     setPrompt(e.target.value);
   };
-
-   async function connectWallet () {
-        console.log("oi")
-   }
 
    async function Generate() {
         setModalMessage("Generating Art...")
@@ -60,11 +57,17 @@ const Minter = () => {
     setGenerate(true)
     setMint(false)
     setMinted(false)
+    setWalletAddress('NFT Mint Master')
     setImg('mintermaster.jpeg')
    }
 
+   async function QRcode() {
+    console.log("qrcode")
+    setWalletAddress('0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270')
+   }
+
    async function Mint() {
-    setModalMessage("Minting your NFT")
+    setModalMessage("Minting your NFT...")
     setmintingmodal(true)
     await new Promise(resolve => setTimeout(resolve, 1000));
     setmintingmodal(false)
@@ -87,6 +90,7 @@ const Minter = () => {
                <div className={styles.image}>
                   <img  src={`../img/${img}`} alt=""/>
                </div>
+               <div className='text-[#b8b8b8] text-[11px]'>{walletAddress}</div>
             </div>
             {
             !mintingmodal 
@@ -103,7 +107,7 @@ const Minter = () => {
                                 placeholder="Enter a prompt"
                             />
                     </div>
-                    <div className={styles.btndiv} > 
+                    <div> 
                             <button className={styles.btnconnect} onClick={() => {Generate()}}>GENERATE</button>    
                     </div>
                    </div>
@@ -111,16 +115,22 @@ const Minter = () => {
                     ""
                   } 
                   {mint ?
-                  <div className='space-y-5'>
-                    <div className={styles.btndiv} > 
+                  <div>
+                    <div> 
                       <button className={styles.btnconnect} onClick={() => {Mint()}}>MINT YOUR NFT</button>    
                     </div>
                     {/* <div className={styles.btndiv} > 
                       <button className={styles.btnclear} onClick={() => {Clear()}}>CLEAR </button>    
                     </div> */}
-                                          <button className={styles.btnredo} onClick={() => {Clear()}}>
-                      ⭮
+                      <div className='flex space-x-5 mx-20 mt-5 max-h-20 '>
+                      <button className={styles.btnQR} onClick={() => {Clear()}}>
+                        ⭮
                       </button>  
+                      
+                      <button className={styles.btnQR} onClick={() => {QRcode()}}>
+                        <img  className='h-[40px] w-[40px] mx-auto' src="qr.png"/>
+                      </button>  
+                      </div>
                    </div>
                   : 
                     ""

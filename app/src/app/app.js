@@ -105,7 +105,7 @@ function App() {
                 <img src={image} className="logo" alt="AI generated art" />
                 <div className="buttons">
                   <button className="button" onClick={handleMintNFT}>
-                    Mint your NFT
+                    Minting your NFT...
                   </button>
                   <button
                     className="button"
