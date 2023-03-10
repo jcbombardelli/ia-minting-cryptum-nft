@@ -11,6 +11,7 @@ import {
 
 import './app.css';
 import { metadataNFT } from '../utils';
+import Minter from '../containers/Minter';
 
 function App() {
   const [prompt, setPrompt] = useState('');
@@ -72,6 +73,8 @@ function App() {
   };
 
   return (
+    <>
+    <Minter/>
     <div className="app">
       <div className="container">
         <div className="top">
@@ -92,7 +95,7 @@ function App() {
                 type="text"
                 placeholder="Enter a prompt"
               />
-              <button className="button" onClick={handleGenerate}>
+              <button className="text-lg" onClick={handleGenerate}>
                 GENERATE
               </button>
             </div>
@@ -102,7 +105,7 @@ function App() {
                 <img src={image} className="logo" alt="AI generated art" />
                 <div className="buttons">
                   <button className="button" onClick={handleMintNFT}>
-                    Mint your NFT
+                    Minting your NFT...
                   </button>
                   <button
                     className="button"
@@ -146,6 +149,7 @@ function App() {
         </Modal>
       </div>
     </div>
+    </>
   );
 }
 
