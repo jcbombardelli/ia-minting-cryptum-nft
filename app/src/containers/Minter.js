@@ -1,178 +1,257 @@
-import React from 'react'
+import React from 'react';
 import { useState } from 'react';
-import { useEffect } from 'react';
-
-
-const styles = {
-   bg: `bg-[#0b0817] px-[18px] pt-[150px] pb-[200px] flex justify-center`,
-   about1: `bg-[#0b0817] font-[Arial] text-[25px] text-center md:text-[45px] pt-[40px]`,
-   purple: `font-manrope text-[25px] text-[#6e45c7] md:text-[40px]`,
-   container: `bg-[#161226] border-white shadow-[1px_1px_10px_-4px_rgba(0,0,0,0)] shadow-white rounded-[30px] px-3 py-3 flex flex-col sm:flex-row justify-center md:max-w-2xl shadow-lg  `,
-   div1: ` p-2 sm:w-1/2 flex flex-col justify-center text-center space-y-2`,
-   div2: ` p-2 sm:w-1/2 align-middle text-center flex flex-col justify-center space-y-5` ,
-   image: ` px-6 py-0 `,
-   generating: `font-[Arial] text-white text-lg mx-6`,
-   metamaskerror: `font-[Arial] text-sm bg-[#ffffff] mx-6 capitalize p-1`,
-   btnconnect: `font-[Arial] border-0 w-full animate-pulse text-lg bg-[#6e45c7] hover:bg-[#7935adcc] text-white font-bold p-4  shadow-md`,
-   btnclear: `font-[Arial] w-full text-lg bg-[#6e45c7] hover:bg-[red] text-white font-bold p-4  shadow-md border-0`,
-   btnredo: `font-[Arial] w-[80px] text-lg bg-[#4b2c91] hover:bg-[grey] text-white font-bold p-4  shadow-md border-0`,
-   btnQR: ` border-0 font-[Arial] w-[50px] text-lg bg-[#4b2c91] hover:bg-[grey] text-white  font-bold   shadow-md`,
-   polygon: `max-w-[100px] mx-auto`,
-   modal: `mx-auto`,
-   spinner: `mb-2 mx-auto mt-[100px] w-20 h-20 rounded-full animate-spin border-8 border-solid border-purple-500 border-t-transparent`,
-   opensea: `max-w-[260px] mx-auto pt-[20px]`,
-   inputbox: `font-[Arial] w-[full] text-[18px]`,
-   inputfield: `w-[100%] text-[#64B6AC] truncate`,
-}
-
+import { styles } from './Minter.style';
+import Modal from 'react-modal';
+import { QrReader } from 'react-qr-reader';
+import {
+  generateStableDiffusionImage,
+  uploadToNFTStorage,
+  mintNFT,
+  generateMetadataFile,
+} from '../app/app.service';
 
 const Minter = () => {
-   const [prompt, setPrompt] = useState('');
-   const [generate, setGenerate] = useState(true)
-   const [mint, setMint] = useState(false)
-   const [minted, setMinted] = useState(false)
-   const [mintingmodal, setmintingmodal] = useState(false)
-   const [modalMessage, setModalMessage] = useState("")
-   const [img, setImg] = useState('mintermaster.jpeg')
-   const [nftAddress, setNftAddress] = useState('0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270')
-   const [walletAddress, setWalletAddress] = useState('NFT Mint Master')
+  const [prompt, setPrompt] = useState('');
 
-   const inputTextChanged = (e) => {
+  const [generateStep, setGenerateStep] = useState(true);
+  const [mintStep, setMintStep] = useState(false);
+  const [mintedStep, setMintedStep] = useState(false);
+
+  const [isLoading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const [isShowCamera, setShowCamera] = useState(true);
+
+  const [image, setImage] = useState('../img/mintermaster.jpeg');
+  const [file, setFile] = useState(null);
+  const [walletAddress, setWalletAddress] = useState('');
+
+  const [nftAddress, setNftAddress] = useState(
+    '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270'
+  );
+
+  const inputTextChanged = (e) => {
     setPrompt(e.target.value);
   };
 
-   async function Generate() {
-        setModalMessage("Generating Art...")
-        setmintingmodal(true)
-        console.log("oi")
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setmintingmodal(false)
-        setGenerate(false)
-        setMint(true)
-        setImg('teste.jpg')
-   }
+  const openCamera = () => {
+    setWalletAddress('');
+    setShowCamera(true);
+  };
 
-   async function Clear() {
-    setmintingmodal(false)
-    setGenerate(true)
-    setMint(false)
-    setMinted(false)
-    setWalletAddress('NFT Mint Master')
-    setImg('mintermaster.jpeg')
-   }
+  const closeCamera = () => {
+    setShowCamera(false);
+  };
 
-   async function QRcode() {
-    console.log("qrcode")
-    setWalletAddress('0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270')
-   }
+  async function handleGenerate() {
+    setLoadingMessage('Generating Art...');
+    setLoading(true);
 
-   async function Mint() {
-    setModalMessage("Minting your NFT...")
-    setmintingmodal(true)
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setmintingmodal(false)
-    setMint(false)
-    setGenerate(false)
-    setMinted(true)
-   }
+    try {
+      const generatedImage = await generateStableDiffusionImage(prompt);
+      setImage(generatedImage.url);
+      setFile(
+        new File([generatedImage.data], `${Date.now().toString()}.png`, {
+          type: 'image/png',
+        })
+      );
+      setMintStep(true);
+    } catch (error) {
+      console.error(error);
+      clear();
+    } finally {
+      setLoading(false);
+      setGenerateStep(false);
+    }
+  }
 
+  async function handleClear() {
+    clear();
+  }
 
-   
+  async function clear() {
+    setLoading(false);
+    setGenerateStep(true);
+    setMintStep(false);
+    setMintedStep(false);
+    setWalletAddress('');
+    setImage('../img/mintermaster.jpeg');
+    setFile(null);
+  }
+
+  const handleScan = (data) => {
+    if (data) {
+      setWalletAddress(data.text.replace('ethereum:', '').split('@')[0]);
+      setShowCamera(false);
+    }
+  };
+
+  async function QRcode() {
+    console.log('qrcode');
+    setWalletAddress('0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270');
+  }
+
+  async function handleMint() {
+    setLoadingMessage('Minting your NFT...');
+    setLoading(true);
+
+    try {
+      const metadataIPFS = await uploadToNFTStorage(file);
+
+      const mintedNFT = await mintNFT({
+        address: walletAddress,
+        uriIPFS: metadataIPFS,
+      });
+      console.log(mintedNFT);
+      setMintedStep(true);
+      setMintStep(false);
+      setGenerateStep(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <>
       <div className={styles.about1}>
-         <span className={styles.purple}>___ NFT Mint </span> <a className='text-[white]'>Master.</a>
+        <span className={styles.purple}>Cryptum NFT Mint </span>{' '}
+        <label className="text-[white]">Master.</label>
       </div>
       <div className={styles.bg}>
-         <div className={styles.container}>
-            <div className={styles.div1}>
-               <div className={styles.image}>
-                  <img  src={`../img/${img}`} alt=""/>
-               </div>
-               <div className='text-[#b8b8b8] text-[11px]'>{walletAddress}</div>
+        <div className={styles.container}>
+          <div className={styles.div1}>
+            <div className={styles.image}>
+              <img src={image} alt="" />
             </div>
-            {
-            !mintingmodal 
-            ?
-               <div className={styles.div2}>
-                  <img src="logo.jpg" alt="" className={styles.polygon}></img>
-                  {generate ?
-                  <div className='space-y-5'>
-                    <div className={styles.inputbox}>
-                            <input
-                                className={styles.inputfield}
-                                onChange={inputTextChanged}
-                                type="text"
-                                placeholder="Enter a prompt"
-                            />
-                    </div>
-                    <div> 
-                            <button className={styles.btnconnect} onClick={() => {Generate()}}>GENERATE</button>    
-                    </div>
-                   </div>
-                  : 
-                    ""
-                  } 
-                  {mint ?
+            <div className="text-[#b8b8b8] text-[11px]">{walletAddress}</div>
+          </div>
+          {!isLoading ? (
+            <div className={styles.div2}>
+              <img src="logo.jpg" alt="" className={styles.polygon}></img>
+              {generateStep ? (
+                <div className="space-y-5">
+                  <div className={styles.inputbox}>
+                    <input
+                      className={styles.inputfield}
+                      onChange={inputTextChanged}
+                      type="text"
+                      placeholder="Enter a prompt"
+                    />
+                  </div>
                   <div>
-                    <div> 
-                      <button className={styles.btnconnect} onClick={() => {Mint()}}>MINT YOUR NFT</button>    
-                    </div>
-                    {/* <div className={styles.btndiv} > 
+                    <button
+                      className={styles.btnconnect}
+                      onClick={handleGenerate}
+                    >
+                      GENERATE
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                ''
+              )}
+              {mintStep ? (
+                <div>
+                  <div>
+                    <button className={styles.btnconnect} onClick={handleMint}>
+                      MINT YOUR NFT
+                    </button>
+                  </div>
+                  {/* <div className={styles.btndiv} > 
                       <button className={styles.btnclear} onClick={() => {Clear()}}>CLEAR </button>    
                     </div> */}
-                      <div className='flex space-x-5 mx-20 mt-5 max-h-20 '>
-                      <button className={styles.btnQR} onClick={() => {Clear()}}>
-                        ⭮
-                      </button>  
-                      
-                      <button className={styles.btnQR} onClick={() => {QRcode()}}>
-                        <img  className='h-[40px] w-[40px] mx-auto' src="qr.png"/>
-                      </button>  
-                      </div>
-                   </div>
-                  : 
-                    ""
-                  } 
-                  {minted ?
-                  <div className='space-y-5'>
-                    <div className={styles.btndiv} > 
-                    <a className='text-[18px] text-bold text-white'>Your NFT Address:</a>
-                    <a className='text-blue-300 text-[14px]' href='https://mumbai.polygonscan.com/token/0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270'> {nftAddress} </a> 
-                    </div>
-                    <div className={styles.btndiv} > 
-                      <button className={styles.btnredo} onClick={() => {Clear()}}>
+                  <div className="flex space-x-5 mx-20 mt-5 max-h-20 ">
+                    <button className={styles.btnQR} onClick={handleClear}>
                       ⭮
-                      </button>    
-                    </div>
-                   </div>
-                  : 
-                    ""
-                  } 
-               </div>
+                    </button>
 
-             : 
-               <div className={styles.modal}>
-                  <div className={styles.spinner}> </div>
-                  <span className={styles.generating}> {modalMessage} </span>
-               </div> 
-            }
-
-         </div>
-        
-        
-
+                    <button
+                      className={styles.btnQR}
+                      onClick={() => {
+                        QRcode();
+                      }}
+                    >
+                      <img
+                        className="h-[40px] w-[40px] mx-auto"
+                        src="qr.png"
+                        alt="qrcode"
+                      />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                ''
+              )}
+              {mintedStep ? (
+                <div className="space-y-5">
+                  <div className={styles.btndiv}>
+                    <p className="text-[18px] text-bold text-white">
+                      Your NFT Address:
+                    </p>
+                    <a
+                      className="text-blue-300 text-[14px]"
+                      href="https://mumbai.polygonscan.com/token/0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270"
+                    >
+                      {' '}
+                      {nftAddress}{' '}
+                    </a>
+                  </div>
+                  <div className={styles.btndiv}>
+                    <button className={styles.btnredo} onClick={handleClear}>
+                      ⭮
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                ''
+              )}
+            </div>
+          ) : (
+            <div className={styles.modal}>
+              <div className={styles.spinner}> </div>
+              <span className={styles.generating}> {loadingMessage} </span>
+            </div>
+          )}
+        </div>
       </div>
-      
+
       <div className="bg-[#0b0817]">
-      <div className="mx-auto text-center flex flex-col w-[200px] bg-[#0b0817]">
-      <a href='https://cryptum.io'><img src={`logo2.png`} alt=""/></a>
-      </div>
+        <div className="mx-auto text-center flex flex-col w-[200px] bg-[#0b0817]">
+          <a href="https://cryptum.io">
+            <img src={`logo2.png`} alt="" />
+          </a>
+        </div>
       </div>
 
+      <div className="modal">
+        <Modal
+          isOpen={isShowCamera}
+          onRequestClose={closeCamera}
+          style={{
+            content: {
+              width: '33%',
+              top: '50%',
+              left: '50%',
+              right: 'auto',
+              bottom: 'auto',
+              marginRight: '-50%',
+              transform: 'translate(-50%, -50%)',
+            },
+          }}
+        >
+          <QrReader
+            delay={250}
+            onError={(error) => console.error(error)}
+            onScan={handleScan}
+            onResult={handleScan}
+          />
+          <p>{walletAddress}</p>
+          <button onClick={closeCamera}>Fechar</button>
+        </Modal>
+      </div>
     </>
-  )
-}
+  );
+};
 
-export default Minter
+export default Minter;
